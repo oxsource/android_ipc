@@ -16,7 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import pizzk.android.ipc.app.service.FakeService
 import pizzk.android.ipc.app.ui.theme.AndroidIPCTheme
-import pizzk.android.ipc.client.Handle
+import pizzk.android.ipc.client.QuickBinder
 import pizzk.android.ipc.model.Request
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                                     action = FakeService.ACTION_ECHO,
                                     payload = "Hello IPC"
                                 )
-                                Handle.invoke(FakeService.DESCRIPTOR, request)
+                                QuickBinder.invoke(FakeService.DESCRIPTOR, request)
                             }
                         }
                     )

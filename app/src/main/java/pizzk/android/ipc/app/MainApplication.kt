@@ -2,7 +2,7 @@ package pizzk.android.ipc.app
 
 import android.app.Application
 import android.util.Log
-import pizzk.android.ipc.client.Handle
+import pizzk.android.ipc.client.QuickBinder
 
 class MainApplication : Application() {
     companion object {
@@ -15,14 +15,14 @@ class MainApplication : Application() {
         val process = getProcessName()
         Log.d(TAG, "onCreate process: $process")
         if (!process.endsWith(REMOTE_PROCESS, ignoreCase = true)) {
-            Handle.setup(context = applicationContext)
+            QuickBinder.setup(context = applicationContext)
         }
     }
 
     override fun onTerminate() {
         val process = getProcessName()
         if (!process.endsWith(REMOTE_PROCESS, ignoreCase = true)) {
-            Handle.release()
+            QuickBinder.release()
         }
         super.onTerminate()
     }

@@ -11,8 +11,8 @@ import pizzk.android.ipc.model.Request
 import pizzk.android.ipc.model.Response
 import java.util.Collections
 
-object Handle {
-    private const val TAG = "DroidIPC.Handle"
+object QuickBinder {
+    private const val TAG = "QuickBinder"
     private const val DEBUG = true
     private const val SPLIT = ";"
     private const val WHAT_SETUP = 0x01
@@ -35,7 +35,7 @@ object Handle {
         if (clients.isNotEmpty()) return
         val ctx = msg.obj as? Context ?: return
         context.value = ctx.applicationContext
-        val services = ctx.resources.getStringArray(R.array.support_android_ipc_services)
+        val services = ctx.resources.getStringArray(R.array.quick_binder_services)
         val clients = services.mapNotNull { e ->
             val items = e.split(SPLIT)
             val descriptor = items.getOrNull(0) ?: return@mapNotNull null

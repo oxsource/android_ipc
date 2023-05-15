@@ -18,7 +18,7 @@ class Client(
     private val component: String,
 ) {
     companion object {
-        private const val TAG = "DroidIPC.Client"
+        private const val TAG = "QuickBinder.Client"
     }
 
     enum class Status {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="support_android_ipc_services">
+    <array name="quick_binder_services">
         <!--        eg.-->
         <!--        <item>${descriptor};${package}/${class}</item>-->
     </array>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="support_android_ipc_services">
+    <array name="quick_binder_services">
         <item>pizzk.android.ipc.app.service.FakeService;pizzk.android.ipc.app/.service.FakeService</item>
     </array>
 </resources>

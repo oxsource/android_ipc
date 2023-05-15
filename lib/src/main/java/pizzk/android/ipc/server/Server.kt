@@ -10,7 +10,7 @@ import pizzk.android.ipc.model.Response
 
 class Server(private val descriptor: String) : Binder(), android.os.IInterface {
     companion object {
-        private const val TAG = "DroidIPC.Server"
+        private const val TAG = "QuickBinder.Server"
         const val TRANSACT_INVOKE = FIRST_CALL_TRANSACTION + 0
     }
 
