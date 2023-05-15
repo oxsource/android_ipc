@@ -1,0 +1,15 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'com.android.application' version '8.0.1' apply false
+    id 'com.android.library' version '8.0.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
+}
+apply from: 'local.gradle'
+
+ext {
+    androidx_kotlin = '1.9.0'
+    kotlin_coroutines_android = '1.6.4'
+    compileSdk = 33
+    minSdk = 28
+    targetSdk = 33
+}

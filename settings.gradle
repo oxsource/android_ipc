@@ -1,0 +1,20 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+apply from: 'local.gradle'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url uri(PUBLISH_MAVEN_LOCAL.PATH) }
+    }
+}
+rootProject.name = "AndroidIPC"
+include ':app'
+include ':lib'
