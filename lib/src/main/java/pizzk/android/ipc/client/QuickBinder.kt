@@ -7,6 +7,7 @@ import android.os.Message
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import pizzk.android.ipc.R
+import pizzk.android.ipc.comm.Callback
 import pizzk.android.ipc.model.Request
 import pizzk.android.ipc.model.Response
 import java.util.Collections
@@ -80,5 +81,14 @@ object QuickBinder {
             Log.d(TAG, "invoke response: $result")
         }
         return result
+    }
+
+    fun invoke(descriptor: String, request: Request, callback: Callback): Boolean {
+        val e = clients[descriptor] ?: return false
+        if (DEBUG) {
+            Log.d(TAG, "async invoke <${e.descriptor}> request: $request")
+        }
+        e.invoke(request, callback)
+        return true
     }
 }

@@ -4,15 +4,16 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
-import pizzk.android.ipc.model.Protocol
+import pizzk.android.ipc.comm.Callback
+import pizzk.android.ipc.comm.readParcelable
 import pizzk.android.ipc.model.Request
 import pizzk.android.ipc.model.Response
 import pizzk.android.ipc.server.Server
 
-@Suppress("DEPRECATION")
 class Client(
     val descriptor: String,
     private val component: String,
@@ -29,16 +30,16 @@ class Client(
     }
 
     private var status = Status.IDLE
-    private var value: IBinder? = null
+    private val server = Server.Stub(descriptor)
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            value = service
+            server.with(value = service)
             status = Status.CONNECTED
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            value = null
+            server.with(value = null)
             status = Status.SUSPEND
         }
     }
@@ -58,7 +59,7 @@ class Client(
             context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
             status = Status.CONNECTING
             return@runCatching
-        }.onFailure { Log.w(TAG, "bindService failed", it) }
+        }.onFailure { Log.w(TAG, "bind service failed", it) }
     }
 
     fun unbindService(context: Context) {
@@ -73,24 +74,46 @@ class Client(
             context.unbindService(connection)
             status = Status.SUSPEND
             return@runCatching
-        }.onFailure { Log.w(TAG, "unbindService failed", it) }
+        }.onFailure { Log.w(TAG, "unbind service failed", it) }
     }
 
-    fun invoke(request: Request): Response {
-        val service = value ?: return Protocol.failure(msg = "service is not available")
-        val data = Parcel.obtain()
-        val reply = Parcel.obtain()
-        val value = kotlin.runCatching {
-            data.writeInterfaceToken(descriptor)
-            data.writeParcelable(request, 0)
-            service.transact(Server.TRANSACT_INVOKE, data, reply, 0)
-            val response: Response? = reply.readParcelable(Response::class.java.classLoader)
-            return@runCatching response ?: throw Exception("response is null")
-        }.onFailure { exp ->
-            Log.e(TAG, "invoke panic: ${exp.message}")
-        }.getOrDefault(Response())
-        data.recycle()
-        reply.recycle()
-        return value
+    fun invoke(request: Request): Response = server.invoke(request)
+
+    fun invoke(request: Request, callback: Callback) = server.invoke(request, callback)
+
+    class RemoteCallback(private val callback: Callback) : Binder(), Callback {
+        companion object {
+            private const val TAG = "QuickBinder.Callback"
+            const val TRANSACT_INVOKE = FIRST_CALL_TRANSACTION + 0
+        }
+
+        override fun onTransact(
+            code: Int,
+            data: Parcel,
+            reply: Parcel?,
+            flags: Int
+        ): Boolean {
+            if (TRANSACT_INVOKE == code) {
+                data.readParcelable<Response>()?.let(this::invoke)
+                return true
+            }
+            return super.onTransact(code, data, reply, flags)
+        }
+
+        override fun invoke(value: Response) = callback.invoke(value)
+
+        class Stub(private val binder: IBinder) : Callback {
+            override fun invoke(value: Response) {
+                val data = Parcel.obtain()
+                val reply = Parcel.obtain()
+                kotlin.runCatching {
+                    data.writeParcelable(value, 0)
+                    binder.transact(TRANSACT_INVOKE, data, reply, 0)
+                    reply.readException()
+                }.onFailure { Log.e(TAG, "stub invoke failed.", it) }
+                data.recycle()
+                reply.recycle()
+            }
+        }
     }
 }

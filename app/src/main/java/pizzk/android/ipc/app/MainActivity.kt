@@ -1,6 +1,7 @@
 package pizzk.android.ipc.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -17,9 +18,21 @@ import kotlinx.coroutines.launch
 import pizzk.android.ipc.app.service.FakeService
 import pizzk.android.ipc.app.ui.theme.AndroidIPCTheme
 import pizzk.android.ipc.client.QuickBinder
+import pizzk.android.ipc.comm.Callback
 import pizzk.android.ipc.model.Request
+import pizzk.android.ipc.model.Response
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val TAG = "QuickBinder.FakeActivity"
+    }
+
+    private val callback = object : Callback {
+        override fun invoke(value: Response) {
+            Log.d(TAG, "async receive: $value")
+        }
+    }
+
     @DelicateCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +51,11 @@ class MainActivity : ComponentActivity() {
                                     action = FakeService.ACTION_ECHO,
                                     payload = "Hello IPC"
                                 )
-                                QuickBinder.invoke(FakeService.DESCRIPTOR, request)
+                                val descriptor = FakeService.DESCRIPTOR
+                                //sync invoke
+                                QuickBinder.invoke(descriptor, request)
+                                //async invoke
+                                QuickBinder.invoke(descriptor, request, callback)
                             }
                         }
                     )
